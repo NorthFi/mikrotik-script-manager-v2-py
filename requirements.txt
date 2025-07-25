@@ -1,0 +1,13 @@
+# Core Requirements
+PyQt5==5.15.9
+requests==2.31.0
+packaging==23.2
+
+# For building executables (optional)
+PyInstaller==5.13.0
+pywin32==306 ; sys_platform == 'win32'
+
+# Development extras (optional)
+black==23.9.1
+flake8==6.1.0
+autopep8==2.0.2
