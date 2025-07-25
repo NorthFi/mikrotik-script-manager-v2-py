@@ -63,8 +63,8 @@ MikroTik Script Manager/
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/mikrotik-script-manager.git
-cd mikrotik-script-manager
+git clone https://github.com/yourusername/mikrotik-script-manager-v2-py.git
+cd mikrotik-script-manager-v2-py
 
 # Install dependencies
 pip install -r requirements.txt
@@ -80,10 +80,10 @@ python main.py
 
 ```bash
 # Build the Docker image
-docker build -t mikrotik-script-manager .
+docker build -t mikrotik-script-manager-v2-py .
 
 # Run the container
-docker run -it --rm -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix mikrotik-script-manager
+docker run -it --rm -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix mikrotik-script-manager-v2-py
 ```
 </details>
 
@@ -175,8 +175,8 @@ add chain=forward src-address=$serverip action=accept
 
 ```bash
 # Clone and setup
-git clone https://github.com/yourusername/mikrotik-script-manager.git
-cd mikrotik-script-manager
+git clone https://github.com/yourusername/mikrotik-script-manager-v2-py.git
+cd mikrotik-script-manager-v2-py
 
 # Create virtual environment
 python -m venv venv
