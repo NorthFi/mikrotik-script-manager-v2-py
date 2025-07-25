@@ -161,9 +161,6 @@ add chain=forward src-address=$serverip action=accept
 ### Main Interface
 ![Main Interface](screenshots/main-interface.png)
 
-### Dark Theme
-![Dark Theme](screenshots/dark-theme.png)
-
 ### Script Editor
 ![Script Editor](screenshots/script-editor.png)
 
@@ -213,12 +210,12 @@ autopep8 --in-place --recursive .
 We welcome contributions! Here's how you can help:
 
 ### 🐛 Bug Reports
-- Use the [issue tracker](https://github.com/yourusername/mikrotik-script-manager/issues)
+- Use the [issue tracker](https://github.com/NorthFi/mikrotik-script-manager-v2-py/issues)
 - Include steps to reproduce
 - Provide system information
 
 ### 💡 Feature Requests
-- Check existing [feature requests](https://github.com/yourusername/mikrotik-script-manager/labels/enhancement)
+- Check existing [feature requests](https://github.com/NorthFi/mikrotik-script-manager-v2-py/labels/enhancement)
 - Describe the use case
 - Explain the expected behavior
 
@@ -262,10 +259,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-- **Documentation**: [Wiki](https://github.com/yourusername/mikrotik-script-manager/wiki)
-- **Issues**: [GitHub Issues](https://github.com/yourusername/mikrotik-script-manager/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/mikrotik-script-manager/discussions)
-- **Email**: support@mikrotik-script-manager.com
+- **Issues**: [GitHub Issues](https://github.com/NorthFi/mikrotik-script-manager-v2-py/issues)
+- **Email**: support@northfi.co.za
 
 ---
 
@@ -273,6 +268,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Made with ❤️ for the MikroTik community**
 
-[⭐ Star this repo](https://github.com/yourusername/mikrotik-script-manager) • [🐛 Report Bug](https://github.com/yourusername/mikrotik-script-manager/issues) • [💡 Request Feature](https://github.com/yourusername/mikrotik-script-manager/issues)
+[⭐ Star this repo](https://github.com/NorthFi/mikrotik-script-manager-v2-py) • [🐛 Report Bug](https://github.com/NorthFi/mikrotik-script-manager-v2-py/issues) • [💡 Request Feature](https://github.com/NorthFi/mikrotik-script-manager-v2-py/issues)
 
 </div>
