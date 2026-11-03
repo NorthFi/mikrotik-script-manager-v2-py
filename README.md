@@ -271,3 +271,13 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 [⭐ Star this repo](https://github.com/NorthFi/mikrotik-script-manager-v2-py) • [🐛 Report Bug](https://github.com/NorthFi/mikrotik-script-manager-v2-py/issues) • [💡 Request Feature](https://github.com/NorthFi/mikrotik-script-manager-v2-py/issues)
 
 </div>
+
+## Phase 1 maintenance behavior
+
+The existing PyQt5 script library, categories, themes, imports, and generated-file workflow remain in place. No router connections or deployments are added in Phase 1. Future optional router management is planned to support API-SSL and SSH, with manual execution approval.
+
+**Script-generation compatibility change:** Generation now edits only supported quoted `:global name "value"` and `:set $name "value"` declarations before a single `### DO NOT EDIT FROM HERE ###` marker. The body remains unchanged; RouterOS resolves variable references at runtime. Templates with missing/duplicate markers or unsupported selected declarations are rejected. Embedded line breaks and NUL are rejected, while special characters in quoted strings are escaped. This is not a complete RouterOS parser or a script safety certification.
+
+**Library safety:** The existing `data/mikrotik_data.json` schema remains. Saves use a temporary file and atomic replacement; the prior valid JSON is copied to `data/mikrotik_data.json.bak`. Invalid or unreadable JSON blocks startup instead of silently resetting the library. Restore a known-good backup or repair the file; preserve both files when troubleshooting.
+
+Run regression tests with `python -m unittest discover -s tests -p 'test*.py' -v`. CI also checks Python syntax. Manual PyQt5 and RouterOS compatibility testing is still required.
