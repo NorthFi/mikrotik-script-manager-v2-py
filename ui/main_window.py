@@ -18,6 +18,7 @@ from PyQt5.QtCore import pyqtSignal
 from ui.highlighter import MikroTikHighlighter
 from ui.styles import apply_dark_style, apply_light_style
 from core.script_manager import ScriptManager
+from core.script_generator import generate_script
 from core.github_importer import GitHubImporter
 
 class MikroTikScriptManager(QMainWindow):
@@ -884,24 +885,13 @@ Special thanks to **MikroTik** for creating RouterOS, the **Qt/PyQt team** for t
             return
             
         code = self.script_manager.scripts[name]['code']
-        parts = code.split(self.script_manager.EDIT_CUTOFF_MARKER, 1)
-        editable = parts[0]
-        protected = parts[1] if len(parts) > 1 else ""
+        values = {var: field.text() for var, field in self.current_vars}
+        try:
+            self.final_script = generate_script(code, values)
+        except ValueError as exc:
+            QMessageBox.critical(self, "Generation rejected", str(exc))
+            return
 
-        for var, field in self.current_vars:
-            val = field.text()
-            editable = self.script_manager.SET_PATTERN.sub(
-                lambda m: f':set ${m.group(1)} "{val}"' if m.group(1) == var else m.group(0),
-                editable
-            )
-            editable = self.script_manager.DEFAULT_PATTERN.sub(
-                lambda m: f':global {m.group(1)} "{val}"' if m.group(1) == var else m.group(0),
-                editable
-            )
-            editable = editable.replace(f'${var}', val)
-
-        self.final_script = editable + self.script_manager.EDIT_CUTOFF_MARKER + protected
-        
         try:
             QApplication.clipboard().setText(self.final_script)
             
