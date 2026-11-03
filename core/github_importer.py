@@ -1,3 +1,4 @@
+# root/core/github_importer.py
 import requests
 import os
 from urllib.parse import urlparse
@@ -13,13 +14,16 @@ class GitHubImporter:
     def import_from_url(cls, url):
         try:
             parsed = urlparse(url)
-            if parsed.netloc not in cls.GITHUB_RAW_DOMAINS:
+            if parsed.hostname not in cls.GITHUB_RAW_DOMAINS or parsed.port is not None or parsed.username is not None or parsed.password is not None:
                 raise ValueError("Only GitHub raw URLs are allowed")
             
-            if not parsed.scheme in ('http', 'https'):
-                raise ValueError("URL must start with http:// or https://")
+            if parsed.scheme != 'https':
+                raise ValueError("GitHub raw imports require HTTPS")
             
-            response = requests.get(url, timeout=10)
+            # Reject redirects to unapproved hosts instead of following them.
+            response = requests.get(url, timeout=10, allow_redirects=False)
+            if 300 <= response.status_code < 400:
+                raise ValueError("GitHub raw URL redirects are not allowed")
             response.raise_for_status()
             
             if not response.text.strip():
