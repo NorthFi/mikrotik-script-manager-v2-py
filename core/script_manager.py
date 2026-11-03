@@ -1,6 +1,9 @@
+# root/core/script_manager.py
 import os
 import re
 import json
+import tempfile
+import shutil
 from collections import OrderedDict
 
 class ScriptManager:
@@ -18,19 +21,37 @@ class ScriptManager:
         self.load_data()
 
     def load_data(self):
+        """Load existing data, refusing to hide corruption behind an empty library."""
+        if not os.path.exists(self.data_file):
+            return
         try:
-            if os.path.exists(self.data_file):
-                with open(self.data_file, 'r', encoding='utf-8') as f:
-                    data = json.load(f)
-                    self.scripts = data.get('scripts', {})
-                    self.categories = data.get('categories', {'Uncategorized': []})
-                    self.dark_mode = data.get('dark_mode', False)
-                    self._migrate_script_categories()
-        except Exception as e:
-            print(f"Error loading data: {e}")
-            self.scripts = {}
-            self.categories = {'Uncategorized': []}
-            self.dark_mode = False
+            with open(self.data_file, "r", encoding="utf-8") as handle:
+                data = json.load(handle)
+            if not isinstance(data, dict):
+                raise ValueError("Library root must be an object")
+            scripts = data.get("scripts", {})
+            categories = data.get("categories", {"Uncategorized": []})
+            if not isinstance(scripts, dict) or not isinstance(categories, dict):
+                raise ValueError("Invalid script/category structure")
+            if any(not isinstance(v, dict) or not isinstance(v.get("code"), str)
+                   or not isinstance(v.get("description", ""), str)
+                   or not isinstance(v.get("category", "Uncategorized"), str)
+                   for v in scripts.values()):
+                raise ValueError("Invalid script entry")
+            if any(not isinstance(k, str) or not isinstance(v, list)
+                   or any(not isinstance(item, str) for item in v)
+                   for k, v in categories.items()):
+                raise ValueError("Invalid category entry")
+            self.scripts = scripts
+            self.categories = categories
+            self.dark_mode = bool(data.get("dark_mode", False))
+            self._migrate_script_categories()
+        except (OSError, UnicodeError, ValueError) as exc:
+            raise RuntimeError(
+                "Cannot load script library at {!r}; original file was not changed. "
+                "Restore a verified backup or repair the JSON before starting."
+                .format(self.data_file)
+            ) from exc
 
     def _migrate_script_categories(self):
         for script_name, script_data in self.scripts.items():
@@ -48,28 +69,50 @@ class ScriptManager:
                 del self.categories[category]
 
     def save_data(self):
+        """Write JSON atomically and preserve a valid previous version as .bak."""
         data = {
-            'scripts': self.scripts,
-            'categories': self.categories,
-            'dark_mode': self.dark_mode
+            "scripts": self.scripts,
+            "categories": self.categories,
+            "dark_mode": self.dark_mode,
         }
-        
+        directory = os.path.dirname(os.path.abspath(self.data_file))
+        os.makedirs(directory, exist_ok=True)
+        temp_path = None
+        backup_temp = None
         try:
+            with tempfile.NamedTemporaryFile(
+                mode="w", encoding="utf-8", dir=directory,
+                prefix=".mikrotik-", suffix=".tmp", delete=False
+            ) as handle:
+                temp_path = handle.name
+                json.dump(data, handle, indent=2, ensure_ascii=False)
+                handle.flush()
+                os.fsync(handle.fileno())
+
+            # Never rotate a corrupt original into the known-good backup.
             if os.path.exists(self.data_file):
-                backup_file = self.data_file + '.bak'
-                if os.path.exists(backup_file):
-                    os.remove(backup_file)
-                os.rename(self.data_file, backup_file)
-            
-            os.makedirs(os.path.dirname(self.data_file), exist_ok=True)
-            with open(self.data_file, 'w', encoding='utf-8') as f:
-                json.dump(data, f, indent=2, ensure_ascii=False)
-                
-        except Exception as e:
-            print(f"Error saving data: {e}")
-            if os.path.exists(backup_file):
-                os.rename(backup_file, self.data_file)
-            raise
+                with open(self.data_file, "r", encoding="utf-8") as existing:
+                    previous = json.load(existing)
+                if not isinstance(previous, dict):
+                    raise ValueError("Existing library is not a JSON object")
+                with tempfile.NamedTemporaryFile(
+                    mode="wb", dir=directory, prefix=".mikrotik-backup-",
+                    suffix=".tmp", delete=False
+                ) as backup:
+                    backup_temp = backup.name
+                    with open(self.data_file, "rb") as source:
+                        shutil.copyfileobj(source, backup)
+                    backup.flush()
+                    os.fsync(backup.fileno())
+                os.replace(backup_temp, self.data_file + ".bak")
+                backup_temp = None
+
+            os.replace(temp_path, self.data_file)
+            temp_path = None
+        finally:
+            for candidate in (temp_path, backup_temp):
+                if candidate and os.path.exists(candidate):
+                    os.unlink(candidate)
 
     def extract_ordered_vars(self, code):
         part = code.split(self.EDIT_CUTOFF_MARKER)[0]
