@@ -281,3 +281,5 @@ The existing PyQt5 script library, categories, themes, imports, and generated-fi
 **Library safety:** The existing `data/mikrotik_data.json` schema remains. Saves use a temporary file and atomic replacement; the prior valid JSON is copied to `data/mikrotik_data.json.bak`. Invalid or unreadable JSON blocks startup instead of silently resetting the library. Restore a known-good backup or repair the file; preserve both files when troubleshooting.
 
 Run regression tests with `python -m unittest discover -s tests -p 'test*.py' -v`. CI also checks Python syntax. Manual PyQt5 and RouterOS compatibility testing is still required.
+
+**GitHub import hardening:** Raw GitHub/Gist imports require HTTPS, reject redirects, enforce a 2 MiB response limit while streaming, and require valid UTF-8. Imports remain synchronous in Phase 1; background workers are deferred to a separate GUI-focused change.
