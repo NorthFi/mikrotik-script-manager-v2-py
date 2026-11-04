@@ -283,3 +283,5 @@ The existing PyQt5 script library, categories, themes, imports, and generated-fi
 Run regression tests with `python -m unittest discover -s tests -p 'test*.py' -v`. CI also checks Python syntax. Manual PyQt5 and RouterOS compatibility testing is still required.
 
 **GitHub import hardening:** Raw GitHub/Gist imports require HTTPS, reject redirects, enforce a 2 MiB response limit while streaming, and require valid UTF-8. Imports remain synchronous in Phase 1; background workers are deferred to a separate GUI-focused change.
+
+**Generated-script preview:** The existing Generate and Open Script action now displays a read-only, syntax-highlighted preview of the exact generated output. Copying to the clipboard and opening a temporary `.rsc` file occur only after the user selects **Copy and Open Script**. Cancel leaves both untouched. The preview does not execute RouterOS commands and is not a substitute for testing against the target RouterOS release.
