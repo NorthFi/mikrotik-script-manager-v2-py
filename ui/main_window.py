@@ -892,6 +892,31 @@ Special thanks to **MikroTik** for creating RouterOS, the **Qt/PyQt team** for t
             QMessageBox.critical(self, "Generation rejected", str(exc))
             return
 
+        # Preview the exact generated script before copying or opening it.
+        # Cancel leaves clipboard and temporary files unchanged.
+        preview = QDialog(self)
+        preview.setWindowTitle("Review Generated RouterOS Script")
+        preview.setMinimumSize(850, 620)
+        preview_layout = QVBoxLayout(preview)
+        preview_layout.addWidget(QLabel(
+            "Review the complete script. Generation does not execute commands on a router."
+        ))
+        preview_editor = QTextEdit(preview)
+        preview_editor.setReadOnly(True)
+        preview_editor.setFont(QFont("Courier New", 10))
+        preview_editor.setPlainText(self.final_script)
+        MikroTikHighlighter(preview_editor.document())
+        preview_layout.addWidget(preview_editor)
+        preview_buttons = QDialogButtonBox(
+            QDialogButtonBox.Ok | QDialogButtonBox.Cancel, parent=preview
+        )
+        preview_buttons.button(QDialogButtonBox.Ok).setText("Copy and Open Script")
+        preview_buttons.accepted.connect(preview.accept)
+        preview_buttons.rejected.connect(preview.reject)
+        preview_layout.addWidget(preview_buttons)
+        if preview.exec_() != QDialog.Accepted:
+            return
+
         try:
             QApplication.clipboard().setText(self.final_script)
             
